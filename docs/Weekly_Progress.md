@@ -1,46 +1,18 @@
-# Engineering Diary
+# Weekly Progress
 
----
-
-## Day 1
-
-### Objective
-
-* Set up the development environment.
-* Configure the SKY130 PDK.
-* Install and verify xschem.
-* Verify ngspice and Magic.
-* Initialize the GitHub repository.
-* Organize the project structure.
-
-### Work Completed
-
-* Installed and configured xschem.
-* Verified ngspice installation.
-* Verified Magic installation.
-* Configured SKY130 PDK.
-* Created a professional GitHub repository structure.
-* Added README and documentation.
-* Connected the local repository with GitHub.
-
-### Issues Faced
-
-* xschem executable not found.
-* Incorrect xschemrc configuration.
-* Hardcoded SKY130 library paths.
-* GitHub synchronization issues.
-
-### Solutions
-
-* Installed xschem successfully.
-* Updated the xschem configuration.
-* Corrected SKY130 library paths.
-* Resolved Git merge and repository synchronization.
-
-### Next Tasks
-
-* Study PLL theory.
-* Design the Phase Frequency Detector (PFD).
-* Simulate the PFD using ngspice.
-* Document results.
+| Week   | Task                          | Status        |
+| ------ | ----------------------------- | ------------- |
+| Week 1 | Literature Review             | ✅ Completed   |
+| Week 1 | Reference Paper Study         | ✅ Completed   |
+| Week 1 | PLL Fundamentals              | ✅ Completed   |
+| Week 1 | Repository Setup              | ✅ Completed   |
+| Week 2 | PLL Theory                    | ⏳ In Progress |
+| Week 2 | Phase Frequency Detector      | ⏳ Pending     |
+| Week 2 | Charge Pump                   | ⏳ Pending     |
+| Week 2 | Loop Filter                   | ⏳ Pending     |
+| Week 3 | Voltage Controlled Oscillator | ⏳ Pending     |
+| Week 3 | Frequency Divider             | ⏳ Pending     |
+| Week 3 | PLL Integration               | ⏳ Pending     |
+| Week 3 | Lock Analysis                 | ⏳ Pending     |
+| Week 3 | Jitter Analysis               | ⏳ Pending     |
 
