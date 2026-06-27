@@ -1,0 +1,24 @@
+# ngspice
+*.raw
+*.log
+*.out
+
+# Magic
+*.ext
+*.sim
+
+# Backup
+*~
+
+# Python
+__pycache__/
+*.pyc
+
+# Windows
+Thumbs.db
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
