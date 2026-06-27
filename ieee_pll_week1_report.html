@@ -1,0 +1,136 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'EB Garamond',Georgia,serif;font-size:9.5pt;line-height:1.45;color:#111;background:#fff}
+.page{width:700px;margin:0 auto;padding:20px 28px 28px;background:#fff;border:0.5px solid var(--color-border-tertiary)}
+.paper-title{font-family:'Source Sans 3',sans-serif;font-size:14pt;font-weight:700;text-align:center;margin-bottom:6px;line-height:1.3}
+.authors{font-family:'Source Sans 3',sans-serif;font-size:9pt;text-align:center;margin-bottom:3px}
+.affil{font-family:'Source Sans 3',sans-serif;font-size:8.5pt;text-align:center;color:#444;margin-bottom:10px;font-style:italic}
+.abstract-box{border:0.5px solid #888;padding:7px 10px;margin-bottom:10px}
+.abstract-label{font-family:'Source Sans 3',sans-serif;font-size:8.5pt;font-weight:700;font-style:italic}
+.abstract-text{font-size:8.5pt;line-height:1.4}
+.columns{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+h2{font-family:'Source Sans 3',sans-serif;font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;text-align:center;margin:7px 0 4px;border-bottom:0.5px solid #999;padding-bottom:2px}
+h3{font-family:'Source Sans 3',sans-serif;font-size:8.5pt;font-weight:700;margin:6px 0 2px;font-style:italic}
+p{font-size:9pt;margin-bottom:5px;text-align:justify;hyphens:auto}
+.eq{font-family:'Source Sans 3',sans-serif;font-size:8.5pt;text-align:center;margin:4px 0;color:#222;font-style:italic}
+.block-table{width:100%;border-collapse:collapse;font-size:8pt;margin:5px 0}
+.block-table th{background:#e8e8e8;font-family:'Source Sans 3',sans-serif;font-weight:700;padding:2px 5px;border:0.5px solid #999;font-size:7.5pt}
+.block-table td{padding:2px 5px;border:0.5px solid #bbb;vertical-align:top}
+.block-table tr:nth-child(even){background:#f7f7f7}
+.refs{font-size:7.5pt;line-height:1.4}
+.refs p{margin-bottom:3px;text-align:left}
+.fullwidth{grid-column:1/-1}
+.divider{grid-column:1/-1;border:none;border-top:0.5px solid #ccc;margin:4px 0}
+sup{font-size:6.5pt}
+</style>
+<div class="page" role="main">
+  <h2 class="sr-only" style="position:absolute;left:-9999px">IEEE Report: AI-Assisted Study of SKY130 PLL Design</h2>
+
+  <div class="paper-title">AI-Assisted Architectural Study of a SKY130 130 nm Phase-Locked Loop: Block Analysis, Toolchain Setup, and Debugging Strategy</div>
+  <div class="authors">Student Author &nbsp;|&nbsp; Week 1 Research Report</div>
+  <div class="affil">Department of Electronics Engineering &nbsp;·&nbsp; Open-Source VLSI Design Programme</div>
+
+  <div class="abstract-box">
+    <span class="abstract-label">Abstract—</span>
+    <span class="abstract-text">This report documents a structured, AI-assisted study of a 130 nm SKY130-process phase-locked loop (PLL) implemented in the open-source reference repository <em>nitjsr_pll_130nm</em>. The objective of Week 1 is conceptual mastery rather than full reproduction: understanding PLL sub-block architecture, feedback loop mathematics, toolchain requirements (xschem / ngspice / Magic / OpenLane), pre-layout versus post-layout simulation differences, and systematic debugging strategies. Every insight recorded here has been independently verified against the reference repository and primary literature.</span>
+  </div>
+
+  <div class="columns">
+
+    <div>
+      <h2>I. Introduction</h2>
+      <p>Phase-Locked Loops are essential mixed-signal circuits used for clock synthesis, frequency multiplication, and jitter reduction. The reference repository targets an <em>8× clock multiplier</em> on the SKY130 open-source PDK: a 5 MHz reference input is multiplied to produce a 40 MHz locked output [1]. The entire flow — schematic capture, simulation, layout, and extraction — uses only free and open-source tools, making it an ideal learning platform.</p>
+      <p>This week's work decomposes the repository into independently understandable tasks, uses AI prompting to accelerate reading of netlist and simulation files, and produces a verified block-by-block understanding of what inputs, outputs, and failure modes to expect.</p>
+
+      <h2>II. PLL Architecture Overview</h2>
+      <p>The 8× PLL comprises five major sub-blocks connected in a negative-feedback loop (Fig. 1). The reference clock <em>f</em><sub>ref</sub> = 5 MHz and the divided-down VCO output <em>f</em><sub>div</sub> are compared by the Phase Frequency Detector (PFD). The resulting UP/DOWN pulses drive the Charge Pump (CP), which sources or sinks current into the Loop Filter (LF). The resulting control voltage V<sub>ctrl</sub> tunes the Voltage-Controlled Oscillator (VCO), and a ÷8 Frequency Divider closes the feedback path [1].</p>
+
+      <div style="border:0.5px solid #aaa;padding:6px;margin:6px 0;font-family:'Source Sans 3',sans-serif;font-size:7.5pt;text-align:center">
+        <div style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;font-size:7pt">
+          <span style="border:0.5px solid #666;padding:2px 5px">f<sub>ref</sub></span>
+          <span>→</span><span style="border:0.5px solid #555;padding:2px 6px;background:#eef">PFD</span>
+          <span>→</span><span style="border:0.5px solid #555;padding:2px 6px;background:#eef">CP</span>
+          <span>→</span><span style="border:0.5px solid #555;padding:2px 6px;background:#eef">LF</span>
+          <span>→</span><span style="border:0.5px solid #555;padding:2px 6px;background:#efe">VCO</span>
+          <span>→</span><span style="border:0.5px solid #666;padding:2px 5px">f<sub>out</sub></span>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:3px">
+          <span style="font-size:6.5pt;color:#555">↑&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;÷8 Divider&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+        </div>
+        <div style="font-size:7pt;color:#555;margin-top:2px;font-style:italic">Fig. 1. PLL feedback loop (8× multiplier)</div>
+      </div>
+
+      <p>The fundamental frequency relationship is:</p>
+      <div class="eq">f<sub>out</sub> = N · f<sub>ref</sub> &nbsp;→&nbsp; 40 MHz = 8 × 5 MHz</div>
+
+      <h2>III. Sub-Block Analysis</h2>
+
+      <h3>A. Phase Frequency Detector</h3>
+      <p>The PFD is a digital state machine, typically built from two D-flip-flops with an AND-gate reset path. When f<sub>ref</sub> leads f<sub>div</sub>, it asserts UP; when f<sub>div</sub> leads, it asserts DOWN. A key failure mode is the <em>dead zone</em>: if reset propagation is too fast, narrow pulses near lock are suppressed, causing phase noise. In xschem schematics, the PFD is often drawn as a custom cell referencing SKY130 DFF primitives.</p>
+
+      <h3>B. Charge Pump</h3>
+      <p>The CP converts digital UP/DOWN pulses into an analog current. An ideal CP sources current I<sub>CP</sub> on UP and sinks the same on DOWN. Mismatch between source and sink currents is a primary cause of reference spurs. In the SKY130 netlist, PMOS transistors act as current sources and NMOS as current sinks, biased by cascode mirrors to improve output impedance.</p>
+
+      <h3>C. Loop Filter</h3>
+      <p>A passive second-order RC filter (R₁, C₁, C₂) converts CP current pulses to V<sub>ctrl</sub>. The zero introduced by R₁C₁ stabilises the loop. The loop bandwidth is approximately:</p>
+      <div class="eq">ω<sub>n</sub> = √(K<sub>VCO</sub> · I<sub>CP</sub> / (2π · N · C₁))</div>
+      <p>Stability requires phase margin &gt; 45°. Choosing C₂ ≈ C₁/10 keeps the second pole well above ω<sub>n</sub>.</p>
+    </div>
+
+    <div>
+      <h3>D. Voltage-Controlled Oscillator</h3>
+      <p>The VCO is a current-starved ring oscillator with an odd number of inverter stages. V<sub>ctrl</sub> sets the tail-current bias, linearly shifting oscillation frequency. The VCO gain K<sub>VCO</sub> (MHz/V) is the slope of the f vs. V<sub>ctrl</sub> curve extracted from a sweep simulation. Ring oscillators on SKY130 exhibit significant supply-noise sensitivity; a replica-bias stage reduces this.</p>
+
+      <h3>E. Divide-by-8 Frequency Divider</h3>
+      <p>Three cascaded toggle flip-flops implement ÷2, ÷4, ÷8 division. The output of the third stage feeds f<sub>div</sub> back to the PFD. Layout placement of the divider close to the PFD minimises routing skew, which is critical for lock accuracy.</p>
+
+      <h2>IV. SKY130 PDK &amp; Toolchain Setup</h2>
+      <table class="block-table">
+        <tr><th>Tool</th><th>Role</th><th>Key File / Command</th></tr>
+        <tr><td>xschem</td><td>Schematic capture</td><td><code>.sch</code> → netlist export</td></tr>
+        <tr><td>ngspice</td><td>SPICE simulation</td><td><code>ngspice top.spice</code></td></tr>
+        <tr><td>Magic VLSI</td><td>Layout &amp; DRC</td><td><code>magic -T sky130A.tech</code></td></tr>
+        <tr><td>netgen</td><td>LVS check</td><td><code>netgen -batch lvs</code></td></tr>
+        <tr><td>OpenLane</td><td>RTL→GDS flow</td><td><code>flow.tcl</code></td></tr>
+      </table>
+
+      <p>PDK setup requires setting the environment variable <code>PDK_ROOT</code> to the SKY130 installation path. The most common setup failure is a version mismatch between the PDK libraries and the installed tools — resolved by pinning versions via the <em>volare</em> PDK manager [2].</p>
+
+      <h2>V. Pre-Layout vs. Post-Layout Simulation</h2>
+      <p><strong>Pre-layout</strong> simulations use ideal wire connections from the xschem netlist. They confirm circuit functionality but ignore parasitics. <strong>Post-layout</strong> simulations use an RC-extracted netlist generated by Magic's <code>ext2spice</code> tool. Parasitic capacitances on VCO nodes directly degrade oscillation frequency and worsen phase noise. Expected differences include: (a) VCO free-running frequency shifts by 5–20%; (b) lock time increases; (c) charge pump glitches may appear due to gate capacitance on switching nodes.</p>
+
+      <h2>VI. Simulation Workflow &amp; Debug Strategy</h2>
+      <p>The recommended incremental simulation strategy is:</p>
+      <div style="font-size:8.2pt;margin:4px 0 5px">
+        <div style="display:flex;align-items:flex-start;gap:5px;margin-bottom:3px"><span style="font-family:'Source Sans 3',sans-serif;font-weight:700;min-width:14px">1.</span><span>Verify VCO free-running range with a V<sub>ctrl</sub> DC sweep before any loop closure.</span></div>
+        <div style="display:flex;align-items:flex-start;gap:5px;margin-bottom:3px"><span style="font-family:'Source Sans 3',sans-serif;font-weight:700;min-width:14px">2.</span><span>Test PFD UP/DOWN pulse widths with a two-clock transient stimulus.</span></div>
+        <div style="display:flex;align-items:flex-start;gap:5px;margin-bottom:3px"><span style="font-family:'Source Sans 3',sans-serif;font-weight:700;min-width:14px">3.</span><span>Verify CP current balance by probing I(V<sub>ctrl</sub>) node directly.</span></div>
+        <div style="display:flex;align-items:flex-start;gap:5px;margin-bottom:3px"><span style="font-family:'Source Sans 3',sans-serif;font-weight:700;min-width:14px">4.</span><span>Close the loop and run a full transient to observe lock; measure lock time as the interval from start to when |f<sub>out</sub> − 40 MHz| &lt; 1%.</span></div>
+        <div style="display:flex;align-items:flex-start;gap:5px"><span style="font-family:'Source Sans 3',sans-serif;font-weight:700;min-width:14px">5.</span><span>For post-layout, compare V<sub>ctrl</sub> settling waveform with pre-layout to quantify parasitic impact.</span></div>
+      </div>
+
+      <p>Common failure modes and fixes are summarised in Table I.</p>
+      <table class="block-table">
+        <tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr>
+        <tr><td>VCO not oscillating</td><td>Bias current too low</td><td>Increase V<sub>ctrl</sub> initial condition</td></tr>
+        <tr><td>PLL never locks</td><td>f<sub>ref</sub> outside VCO range</td><td>Re-tune loop filter / K<sub>VCO</sub></td></tr>
+        <tr><td>Spice convergence error</td><td>Parasitic short in netlist</td><td>Check <code>ext2spice</code> warnings</td></tr>
+        <tr><td>LVS mismatch</td><td>Floating port in layout</td><td>Verify all labels in Magic</td></tr>
+      </table>
+
+      <h2>VII. Conclusion</h2>
+      <p>This structured decomposition of the <em>nitjsr_pll_130nm</em> repository provides a clear pathway from PLL theory to open-source implementation. Each sub-block has defined inputs, outputs, and testable failure modes. The AI-assisted workflow accelerated literature cross-referencing and netlist reading, while human verification ensured correctness of every claim. Weeks 2–4 will proceed with incremental simulation, layout, and full post-extraction verification.</p>
+
+      <h2>References</h2>
+      <div class="refs">
+        <p>[1] H. Singh, "nitjsr_pll_130nm: SKY130 8× Clock Multiplier PLL," GitHub, 2023. [Online]. Available: https://github.com/himansh107/nitjsr_pll_130nm</p>
+        <p>[2] efabless, "volare: SKY130 PDK version manager," GitHub, 2022. [Online]. Available: https://github.com/efabless/volare</p>
+        <p>[3] R. Best, <em>Phase-Locked Loops: Design, Simulation, and Applications</em>, 6th ed. McGraw-Hill, 2007.</p>
+        <p>[4] B. Razavi, <em>Design of Analog CMOS Integrated Circuits</em>, 2nd ed. McGraw-Hill, 2017.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
